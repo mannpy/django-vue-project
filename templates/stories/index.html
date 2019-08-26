@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Vue{% endblock title %}
+
+{% block content %}
+<div id="app">
+  <div class="container">
+    <div class="row">
+      <div class="col">
+        <table class="table table-striped">
+          <tr>
+            <th>#</th>
+            <th>Сюжет</th>
+            <th>Автор</th>
+            <th>Кол-во голосов</th>
+            <th>Действия</th>
+          </tr>
+          <tr v-for="(story, index) in stories" :key="story.uuid" is="story" :story="story" :index="index"></tr>
+        </table>
+
+        <p class="lead">Вот список всех ваших историй.</p>
+        <pre>${ $data }</pre>
+      </div>
+    </div>
+  </div>
+  
+</div>
+
+<template id="template-story-raw">
+  <tr>
+    <td>${index + 1}</td>
+    <td><span>${story.plot}</span></td>
+    <td><span>${story.writer}</span></td>
+    <td>${story.upvotes}</td>
+    <td>
+      <div class="btn-group">
+        <button type="button" @click="upvoteStory(story)" class="btn btn-primary">
+        Проголосовать
+        </button>
+        <button type="button" @click="deleteStory(story)" class="btn btn-danger">
+        Удалить
+        </button>
+      </div>
+    </td>
+  </tr>
+</template>
+
+
+{% csrf_token %}
+{% endblock content %}
