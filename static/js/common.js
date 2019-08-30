@@ -6,23 +6,42 @@ Vue.component('story', {
   methods: {
     upvoteStory: function (story) {
       story.upvotes++;
-      story['csrfToken'] = csrfToken;
       axios({
         method: 'patch',
         url:`/api/stories/${story.uuid}/`, 
-        data: story
+        data: story,
+        csrfToken: csrfToken
       }).catch(function(e) {
         console.log(e)
       });
     },
 
+    updateStory: function (story) {
+      axios.patch(`/api/stories/${story.uuid}/`, story)
+      // Установить false свойство editing, чтобы показывать снова кнопки действий и
+      //скрывать поля ввода
+      story.editing = false;
+    },
+
     deleteStory: function (story) {
       // ищем нужную историю
-      let index = vm.stories.indexOf(story);
+      let index = this.$parent.stories.indexOf(story);
+      this.$parent.stories.splice(index, 1);
+      axios.delete('/api/stories/' + story.uuid);
+    },
 
-      // удаляем её
-      vm.stories.splice(index, 1)
-      }
+    storeStory: function (story) {
+      vm = this.$parent;
+      axios.post('/api/stories/', story).then(function (response) {
+      story.editing = false;
+      Vue.set(story, 'uuid', response.data.results.uuid);
+      });
+    },
+
+    editStory: function (story) {
+      story.editing = true;
+    },
+
   },
   delimiters: ['${', '}'],
 });
@@ -30,16 +49,49 @@ Vue.component('story', {
 let app = new Vue({
     el: '#app',
     data: {
-      stories: []
+      stories: [],
+      pagination: {}
     },
-    mounted: function () {
-      let vm = this;
-      axios.get('api/stories')
+    methods: {
+      fetchStories: function(page_url) {
+        let vm = this;
+        page_url = page_url || 'api/stories';
+        axios.get(page_url)
         .then(function (response) {
-          Vue.set(vm, 'stories', response.data)
+          let storiesReady = response.data.results.map(function (story) {
+            story.editing = false;
+            return story
+          });
+          vm.makePagination(response.data);
+          Vue.set(vm, 'stories', storiesReady);
+          
           // Или как мы делали раньше
           // vm.stories = response.data
-        })
+        });
+      },
+      makePagination: function(data) {
+        let pagination = {
+          current_page: data.current_page,
+          last_page: data.last_page,
+          next_page_url: data.next_page_url,
+          prev_page_url: data.prev_page_url,
+          page_range: data.page_range
+        };
+
+        Vue.set(this, 'pagination', pagination);
+
+      },
+      createStory: function () {
+        var newStory = {
+          plot: '',
+          upvotes: 0,
+          editing: true
+        };
+        this.stories.push(newStory);
+        },
+    },
+    mounted: function () {
+      this.fetchStories();
     },
     delimiters: ['${', '}'],
 })
