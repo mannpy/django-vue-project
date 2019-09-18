@@ -1,23 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
 {% load staticfiles %}
+{% load render_bundle from webpack_loader %}
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>{% block title %}Django{% endblock title %}</title>
-    {% block stylesheets %}
-    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    {% endblock stylesheets %}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>{% block title %}Django{% endblock title %}</title>
+  {% block stylesheets %}
+  <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  {% endblock stylesheets %}
+
+  {% render_bundle 'app' 'css' %}
 </head>
 <body>
-    
-    {% block content %}
-    {% endblock content %}
+{% block content %}
+{% endblock content %}
 
-    <script src="{% static 'js/vue.js' %}"></script>
-    <script src="{% static 'js/axios.min.js' %}"></script>
-    <script src="{% static 'js/common.js' %}"></script>
+{% render_bundle 'app' 'js' %}
 </body>
 </html>
